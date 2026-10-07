@@ -1,0 +1,22 @@
+{
+  "name": "verzel-store-qa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Teste técnico de QA Júnior da Verzel: cenários em Gherkin e automação com Playwright",
+  "scripts": {
+    "test": "bddgen && playwright test",
+    "test:ui": "bddgen && playwright test --project=ui",
+    "test:api": "bddgen && playwright test --project=api",
+    "test:regressao": "bddgen && playwright test --grep-invert @bug",
+    "test:bugs": "bddgen && playwright test --grep @bug",
+    "test:headed": "bddgen && playwright test --project=ui --headed --workers=1",
+    "report": "playwright show-report",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^22.0.0",
+    "playwright-bdd": "^9.2.1",
+    "typescript": "^5.9.0"
+  }
+}
