@@ -5,7 +5,6 @@ import { Entao, Quando } from './fixtures';
 
 const CALCULO = '/api/carrinho/calcular';
 const PEDIDOS = '/api/pedidos';
-const JSON_HEADERS = { 'content-type': 'application/json' };
 
 /** Campos do resumo que o cálculo do carrinho e o pedido devolvem iguais. */
 const CAMPOS_RESUMO = ['itens', 'subtotal', 'desconto', 'frete', 'freteGratis', 'valorFaltanteFreteGratis', 'total', 'cupom'];
@@ -16,88 +15,72 @@ function temNoMaximoDuasCasas(valor: number): boolean {
 
 // ----- Cálculo do carrinho -----
 
-Quando('calculo o carrinho com {string}', async ({ request, respostaApi }, itens: string) => {
-  await respostaApi.guardar(await request.post(CALCULO, { data: { itens: itensParaApi(itens) } }));
+Quando('calculo o carrinho com {string}', async ({ respostaApi }, itens: string) => {
+  await respostaApi.enviar('POST', CALCULO, { itens: itensParaApi(itens) });
 });
 
 Quando(
   'calculo o carrinho com {string} e o cupom {string}',
-  async ({ request, respostaApi }, itens: string, cupom: string) => {
-    await respostaApi.guardar(
-      await request.post(CALCULO, { data: { itens: itensParaApi(itens), cupom: comEspacos(cupom) } }),
-    );
+  async ({ respostaApi }, itens: string, cupom: string) => {
+    await respostaApi.enviar('POST', CALCULO, { itens: itensParaApi(itens), cupom: comEspacos(cupom) });
   },
 );
 
 // A quantidade chega como texto do cenário e é enviada como JSON: 6, -1, 1.5, null, "2".
 Quando(
   'calculo o carrinho com o produto {string} na quantidade {}',
-  async ({ request, respostaApi }, produtoId: string, quantidade: string) => {
-    await respostaApi.guardar(
-      await request.post(CALCULO, { data: { itens: [{ produtoId, quantidade: JSON.parse(quantidade) }] } }),
-    );
+  async ({ respostaApi }, produtoId: string, quantidade: string) => {
+    await respostaApi.enviar('POST', CALCULO, { itens: [{ produtoId, quantidade: JSON.parse(quantidade) }] });
   },
 );
 
 // ----- Pedidos -----
 
-Quando('envio um pedido com {string}', async ({ request, respostaApi }, itens: string) => {
-  await respostaApi.guardar(
-    await request.post(PEDIDOS, { data: { cliente: CLIENTE_VALIDO, itens: itensParaApi(itens) } }),
-  );
+Quando('envio um pedido com {string}', async ({ respostaApi }, itens: string) => {
+  await respostaApi.enviar('POST', PEDIDOS, { cliente: CLIENTE_VALIDO, itens: itensParaApi(itens) });
 });
 
 Quando(
   'envio um pedido com {string} e o cupom {string}',
-  async ({ request, respostaApi }, itens: string, cupom: string) => {
-    await respostaApi.guardar(
-      await request.post(PEDIDOS, {
-        data: { cliente: CLIENTE_VALIDO, itens: itensParaApi(itens), cupom: comEspacos(cupom) },
-      }),
-    );
+  async ({ respostaApi }, itens: string, cupom: string) => {
+    await respostaApi.enviar('POST', PEDIDOS, { cliente: CLIENTE_VALIDO, itens: itensParaApi(itens), cupom: comEspacos(cupom) });
   },
 );
 
 Quando(
   'envio um pedido com {string} alterando o campo {string} do cliente para {string}',
-  async ({ request, respostaApi }, itens: string, campo: string, valor: string) => {
+  async ({ respostaApi }, itens: string, campo: string, valor: string) => {
     const cliente = { ...CLIENTE_VALIDO, [campo]: valor };
-    await respostaApi.guardar(await request.post(PEDIDOS, { data: { cliente, itens: itensParaApi(itens) } }));
+    await respostaApi.enviar('POST', PEDIDOS, { cliente, itens: itensParaApi(itens) });
   },
 );
 
 Quando(
   'envio um pedido com {string} e o cliente:',
-  async ({ request, respostaApi }, itens: string, tabela: DataTable) => {
+  async ({ respostaApi }, itens: string, tabela: DataTable) => {
     const cliente = tabela.rowsHash();
-    await respostaApi.guardar(await request.post(PEDIDOS, { data: { cliente, itens: itensParaApi(itens) } }));
+    await respostaApi.enviar('POST', PEDIDOS, { cliente, itens: itensParaApi(itens) });
   },
 );
 
 Quando(
   'envio um pedido com o produto {string} na quantidade {}',
-  async ({ request, respostaApi }, produtoId: string, quantidade: string) => {
-    await respostaApi.guardar(
-      await request.post(PEDIDOS, {
-        data: { cliente: CLIENTE_VALIDO, itens: [{ produtoId, quantidade: JSON.parse(quantidade) }] },
-      }),
-    );
+  async ({ respostaApi }, produtoId: string, quantidade: string) => {
+    await respostaApi.enviar('POST', PEDIDOS, { cliente: CLIENTE_VALIDO, itens: [{ produtoId, quantidade: JSON.parse(quantidade) }] });
   },
 );
 
 // ----- Requisições livres -----
 
-Quando('envio uma requisição {word} para {string}', async ({ request, respostaApi }, metodo: string, rota: string) => {
-  await respostaApi.guardar(await request.fetch(rota, { method: metodo, headers: JSON_HEADERS }));
+Quando('envio uma requisição {word} para {string}', async ({ respostaApi }, metodo: string, rota: string) => {
+  await respostaApi.enviar(metodo, rota);
 });
 
 Quando(
   'envio uma requisição {word} para {string} com o corpo:',
-  async ({ request, respostaApi }, metodo: string, rota: string, corpo: string) => {
+  async ({ respostaApi }, metodo: string, rota: string, corpo: string) => {
     // Buffer: o texto vai exatamente como está no cenário, mesmo quando é um JSON malformado.
-    await respostaApi.guardar(
-      await request.fetch(rota, { method: metodo, headers: JSON_HEADERS, data: Buffer.from(corpo, 'utf8') }),
-    );
+    await respostaApi.enviar(metodo, rota, Buffer.from(corpo, 'utf8'));
   },
 );
 

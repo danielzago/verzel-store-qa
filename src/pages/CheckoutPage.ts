@@ -1,12 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
 
-/** Rótulo do campo na tela e o nome usado nos ids do formulário. */
-const CAMPOS: Record<string, string> = {
-  'Nome completo': 'nome',
-  'E-mail': 'email',
-  CEP: 'cep',
-};
-
 /** Página de finalização da compra e página de pedido confirmado. */
 export class CheckoutPage {
   constructor(private readonly page: Page) {}
@@ -21,25 +14,26 @@ export class CheckoutPage {
     await this.page.getByRole('button', { name: 'Confirmar pedido' }).click();
   }
 
-  erroDoCampo(rotulo: string): Locator {
-    const campo = CAMPOS[rotulo];
-    if (!campo) {
-      throw new Error(`Campo "${rotulo}" não existe no formulário. Use: ${Object.keys(CAMPOS).join(', ')}.`);
-    }
-    return this.page.locator(`#campo-${campo}-erro`);
+  /**
+   * Campo do formulário pelo rótulo. A mensagem de erro fica ligada ao campo
+   * por aria-describedby, então é conferida como descrição acessível do campo.
+   */
+  campo(rotulo: string): Locator {
+    return this.page.getByLabel(rotulo, { exact: true });
   }
 
   // ----- Pedido confirmado -----
 
   seloConfirmado(): Locator {
-    return this.page.locator('.confirmacao-selo');
+    return this.page.getByText('Pedido confirmado', { exact: true });
   }
 
-  numeroPedido(): Locator {
-    return this.page.locator('.numero-pedido');
+  /** Título principal da confirmação: "Pedido VZ-000000". */
+  tituloPedido(): Locator {
+    return this.page.getByRole('heading', { level: 1 });
   }
 
   agradecimento(): Locator {
-    return this.page.locator('.confirmacao').getByText(/^Obrigado, /);
+    return this.page.getByText(/^Obrigado, /);
   }
 }

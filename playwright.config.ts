@@ -24,6 +24,8 @@ export default defineConfig({
   use: {
     baseURL: process.env.BASE_URL ?? 'https://verzel-store.qa-test-verzel-store.workers.dev',
     locale: 'pt-BR',
+    // Os valores do resumo têm o atributo data-valor="subtotal|desconto|frete|total": getByTestId('total')
+    testIdAttribute: 'data-valor',
     // Evidências: print de todo teste de interface, trace e vídeo dos que falham
     screenshot: 'on',
     trace: 'retain-on-failure',

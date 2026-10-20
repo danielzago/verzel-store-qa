@@ -362,7 +362,16 @@ Um print por teste, tirado pelo Playwright ao final do cenário. São 54 prints,
 
 ## Cenários de API
 
-Os cenários de API não têm tela. A evidência é o resultado de cada teste no Playwright, abaixo, e os valores devolvidos pela API, registrados em [`execucao-testes.md`](execucao-testes.md).
+Os cenários de API não têm tela para fotografar. A evidência de um teste de API é o par **requisição enviada e resposta recebida**.
+
+Desde o ajuste de 19/10/2026, todo teste de API anexa esse par ao relatório, passe ou falhe. A anexação fica num ponto só, o método `enviar` da classe `RespostaApi` em [`src/steps/fixtures.ts`](../src/steps/fixtures.ts), por onde passam todas as chamadas. Cada teste ganha dois anexos em JSON:
+
+- `requisicao <método> <rota>`: método, rota e corpo enviado.
+- `resposta <status>`: status HTTP e corpo devolvido.
+
+Para ver: `npm run test:api` e depois `npm run report`. No relatório, abra qualquer teste de API; os anexos aparecem no fim da página do teste. O relatório do Cucumber (`cucumber-report/index.html`) mostra os mesmos anexos junto dos passos em Gherkin.
+
+O resultado de cada teste na execução de 06/10/2026 está abaixo, e os valores devolvidos pela API estão registrados em [`execucao-testes.md`](execucao-testes.md).
 
 | Cenário | Testes | Passaram | Falharam |
 |---|---|---|---|

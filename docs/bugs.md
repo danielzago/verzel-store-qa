@@ -3,13 +3,24 @@
 Entrega VZS-142 (cupom de desconto e frete grátis), versão 2.3.0.
 Ambiente: https://verzel-store.qa-test-verzel-store.workers.dev/, em 06/10/2026.
 
-| Bug | Título | Severidade | Critério | Onde ocorre |
-|---|---|---|---|---|
-| [BUG-01](#bug-01) | Frete de R$ 19,90 é cobrado com subtotal de exatamente R$ 200,00 | Alta | CA06 | API e interface |
-| [BUG-02](#bug-02) | API aceita mais de 5 unidades do mesmo produto | Alta | CA10 | API |
-| [BUG-03](#bug-03) | Item sem `produtoId` devolve `PRODUTO_NAO_ENCONTRADO` com "undefined" na mensagem | Baixa | Códigos de erro | API |
+| Bug | Título | Severidade | Prioridade sugerida | Critério | Onde ocorre |
+|---|---|---|---|---|---|
+| [BUG-01](#bug-01) | Frete de R$ 19,90 é cobrado com subtotal de exatamente R$ 200,00 | Alta | Alta | CA06 | API e interface |
+| [BUG-02](#bug-02) | API aceita mais de 5 unidades do mesmo produto | Alta | Média | CA10 | API |
+| [BUG-03](#bug-03) | Item sem `produtoId` devolve `PRODUTO_NAO_ENCONTRADO` com "undefined" na mensagem | Baixa | Baixa | Códigos de erro | API |
 
-Severidade usada: **Alta** quando uma regra de negócio da entrega é descumprida e afeta o valor ou o conteúdo do pedido. **Baixa** quando a requisição é recusada como deveria e o problema está só na forma da resposta.
+**Severidade** é o tamanho do impacto no produto quando o defeito acontece:
+
+- **Alta**: uma regra de negócio da entrega é descumprida e afeta o valor ou o conteúdo do pedido.
+- **Baixa**: a requisição é recusada como deveria e o problema está só na forma da resposta.
+
+**Prioridade** é a urgência de corrigir. Ela considera quantos clientes são afetados, com que frequência e se o defeito aparece no uso normal da loja:
+
+- **Alta**: atinge o cliente que usa a loja normalmente. Deve ser corrigido antes da entrega.
+- **Média**: descumpre a regra, mas só aparece fora do uso normal da loja, como numa chamada direta à API. Corrigir na mesma versão, sem travar a entrega.
+- **Baixa**: não muda o resultado para o cliente. Pode ir para o backlog.
+
+A prioridade é uma sugestão do QA, com a justificativa em cada bug. A decisão final é do PO com o time.
 
 As respostas abaixo são as que a loja devolveu na data do teste. Os prints e a saída dos testes automatizados que falharam estão em [`evidencias.md`](evidencias.md).
 
@@ -21,6 +32,7 @@ As respostas abaixo são as que a loja devolveu na data do teste. Os prints e a 
 | | |
 |---|---|
 | Severidade | Alta |
+| Prioridade sugerida | Alta: atinge qualquer cliente cuja compra some exatamente R$ 200,00, valor fácil de atingir (2 mochilas, 4 garrafas), e mexe no valor cobrado |
 | Critério de aceite | CA06: "O frete é grátis para compras com subtotal a partir de R$ 200,00, inclusive." |
 | Onde ocorre | `POST /api/carrinho/calcular`, `POST /api/pedidos`, carrinho e finalização da compra |
 | Cenários que falham | CT-UI-11 (3 exemplos), CT-UI-13, CT-API-01 (3 exemplos), CT-API-02 (1 exemplo), CT-API-22 |
@@ -105,6 +117,7 @@ O valor faltante sai correto (0), e só a decisão do frete está errada. Isso i
 | | |
 |---|---|
 | Severidade | Alta |
+| Prioridade sugerida | Média: descumpre o CA10, mas o cliente pela loja não consegue provocar, porque a interface bloqueia a sexta unidade. Só acontece chamando a API direto |
 | Critério de aceite | CA10: "Cada produto pode ter no máximo 5 unidades por pedido. A regra vale para a interface e para a API." |
 | Onde ocorre | `POST /api/carrinho/calcular` e `POST /api/pedidos` |
 | Cenários que falham | CT-API-06 (2 exemplos), CT-API-28 (2 exemplos) |
@@ -179,6 +192,7 @@ O limite existe só na interface. Qualquer chamada direta à API fecha pedidos c
 | | |
 |---|---|
 | Severidade | Baixa |
+| Prioridade sugerida | Baixa: a requisição já é recusada; corrigir o código e a mensagem do erro ajuda quem integra com a API, mas não muda o resultado para o cliente |
 | Referência | Tabela "Códigos de erro": `ITEM_INVALIDO` quando "um item não é um objeto com produtoId e quantidade" |
 | Onde ocorre | `POST /api/carrinho/calcular` |
 | Cenário que falha | CT-API-48 |

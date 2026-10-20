@@ -49,7 +49,7 @@ Para apontar para outro endereço da loja, defina `BASE_URL` antes do comando.
 
 Cada execução gera:
 
-- `playwright-report/`: relatório do Playwright, com print de todo teste de interface e, para os que falharam, trace e vídeo da execução.
+- `playwright-report/`: relatório do Playwright, com print de todo teste de interface e, para os que falharam, trace e vídeo da execução. Todo teste de API traz anexadas a requisição enviada e a resposta recebida, com status e corpo, inclusive os que passaram.
 - `cucumber-report/index.html`: relatório no formato Cucumber, com os passos em Gherkin.
 
 Esses relatórios não ficam no repositório por causa do tamanho. O resultado da execução de 06/10/2026, com os prints, está em [`docs/evidencias.md`](docs/evidencias.md).
@@ -132,10 +132,23 @@ Os cenários `@bug` falham de propósito: eles conferem o que a documentação p
 | BUG-02 | A API aceita mais de 5 unidades do mesmo produto, no cálculo (200) e no pedido (201). | CA10 | CT-API-06, CT-API-28 |
 | BUG-03 | Item sem `produtoId` devolve `PRODUTO_NAO_ENCONTRADO` com a mensagem "Produto undefined não encontrado." no lugar de `ITEM_INVALIDO`. | Códigos de erro | CT-API-48 |
 
+## Ajustes após o retorno da Verzel
+
+O retorno da primeira etapa apontou três pontos, ajustados em 19/10/2026:
+
+| Ponto | Ajuste |
+|---|---|
+| Os reports traziam severidade, mas não prioridade | [`docs/bugs.md`](docs/bugs.md) ganhou a prioridade sugerida de cada bug, com a justificativa e o critério usado |
+| As leituras usavam classes e ids CSS (`.item-carrinho`, `#mensagem-cupom`, `section.resumo`) | Todas as leituras passaram a usar papéis, rótulos e `getByTestId`, como as ações. Ver "Localizadores" abaixo |
+| Os cenários de API aprovados não tinham evidência própria | Todo teste de API anexa a requisição e a resposta ao relatório. Ver [`docs/evidencias.md`](docs/evidencias.md) |
+
+O resultado da suíte não mudou: os mesmos 14 testes `@bug` falham e os demais passam.
+
 ## Decisões de automação
 
 - **Interface como o cliente usa**: o carrinho é montado clicando em "Adicionar ao carrinho" na vitrine, sem gravar dados direto no navegador.
 - **API testada à parte**: os cálculos são feitos pela API, então limites e arredondamento são conferidos nela, com mais combinações e sem depender da tela.
 - **Tela comparada com a API**: o cenário CT-UI-16 confere que a tela exibe os mesmos valores que a API calculou.
-- **Localizadores**: papéis e rótulos acessíveis (botão, campo, título) sempre que existem, os atributos `data-valor` do resumo e, onde não há alternativa, classes CSS.
+- **Localizadores**: os elementos são encontrados como o cliente enxerga a tela, tanto nas ações quanto nas conferências. `getByRole` para botões, links, títulos, itens de lista, a seção do resumo e a mensagem de erro do cupom (papel `alert`). `getByLabel` para os campos do formulário. As mensagens de erro do formulário são conferidas como descrição acessível do campo. Os valores do resumo usam `getByTestId`, com o atributo `data-valor` configurado como `testIdAttribute`. Não há seletor de classe ou id CSS.
+- **Evidência dos testes de API**: toda chamada passa pelo método `enviar` da classe `RespostaApi` (`src/steps/fixtures.ts`), que anexa ao relatório a requisição e a resposta. Por estar num ponto só, os 89 testes de API ganharam a evidência sem mudança em cada cenário.
 - **Ambiente compartilhado**: a execução usa 4 workers e não faz teste de carga, como pede o enunciado.

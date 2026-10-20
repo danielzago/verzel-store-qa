@@ -61,6 +61,7 @@ Entao('o carrinho não exibe aviso de valor faltante', async ({ carrinho }) => {
 });
 
 Entao('os valores do resumo na tela são iguais aos calculados pela API', async ({ page, carrinho }) => {
+  await carrinho.esperarCalculo();
   // O carrinho fica no sessionStorage da aba. Os mesmos itens e cupom são enviados à API.
   const itens = await page.evaluate(() => JSON.parse(sessionStorage.getItem('verzel-store:itens') ?? '[]'));
   const cupom = await page.evaluate(() => JSON.parse(sessionStorage.getItem('verzel-store:cupom') ?? 'null'));
